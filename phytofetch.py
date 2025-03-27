@@ -4,6 +4,8 @@ import os
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+import pubchempy as pcp
+
 # Set up Streamlit app
 st.title("Phytocompound Retrieval & 3D SDF Downloader")
 
@@ -59,12 +61,12 @@ if phyto_data is not None and not phyto_data.empty:
     plant_folder = os.path.join("Downloads", plant_name.replace(" ", "_"))
     os.makedirs(plant_folder, exist_ok=True)
 
-# ✅ Save Excel file inside the plant folder
+    # ✅ Save Excel file inside the plant folder
     excel_path = os.path.join(plant_folder, f"{plant_name.replace(' ', '_')}.xlsx")
     phyto_data.to_excel(excel_path, index=False)
     st.success(f"Saved phytochemical data as {excel_path}")
 
-# ✅ Create a subfolder for SDF files inside the plant folder
+    # ✅ Create a subfolder for SDF files inside the plant folder
     sdf_folder = os.path.join(plant_folder, "SDF_Files")
     os.makedirs(sdf_folder, exist_ok=True)
 
@@ -82,24 +84,24 @@ if phyto_data is not None and not phyto_data.empty:
         for index, row in phyto_data.iterrows():
             compound_name = row["Phytochemical name"]
             if database == "PubChem":
-                # Fetch CID from PubChem
-                pubchem_url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{compound_name}/cids/JSON"
-                response = requests.get(pubchem_url)
+                try:
+                    compound = pcp.get_compounds(compound_name, 'name')
+                    if compound:
+                        cid = compound[0].cid
+                        sdf_url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/{cid}/SDF"
+                        sdf_path = os.path.join(download_folder, f"{compound_name}.sdf")
 
-                if response.status_code == 200 and "IdentifierList" in response.json():
-                    cid = response.json()["IdentifierList"]["CID"][0]
-                    sdf_url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/{cid}/SDF"
-                    sdf_path = os.path.join(download_folder, f"{compound_name}.sdf")
-
-                    sdf_response = requests.get(sdf_url)
-                    if sdf_response.status_code == 200:
-                        with open(sdf_path, "wb") as file:
-                            file.write(sdf_response.content)
-                        st.success(f"Downloaded {compound_name}.sdf from PubChem")
+                        sdf_response = requests.get(sdf_url)
+                        if sdf_response.status_code == 200:
+                            with open(sdf_path, "wb") as file:
+                                file.write(sdf_response.content)
+                            st.success(f"Downloaded {compound_name}.sdf from PubChem")
+                        else:
+                            st.error(f"Failed to download {compound_name}.sdf from PubChem")
                     else:
-                        st.error(f"Failed to download {compound_name}.sdf from PubChem")
-                else:
-                    st.error(f"Failed to find CID for {compound_name}")
+                        st.error(f"No CID found for {compound_name}")
+                except Exception as e:
+                    st.error(f"An error occurred while fetching CID for {compound_name}: {e}")
 
             elif database == "IMPPAT":
                 imp_id = row["IMPPAT Phytochemical identifier"]
