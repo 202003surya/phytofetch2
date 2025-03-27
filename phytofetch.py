@@ -5,6 +5,7 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 import pubchempy as pcp
+from pathlib import Path
 
 # Set up Streamlit app
 st.title("Phytocompound Retrieval & 3D SDF Downloader")
@@ -56,8 +57,11 @@ if phyto_data is not None and not phyto_data.empty:
     st.subheader("Phytochemicals Found:")
     st.write(phyto_data)
 
+    # Get the user's Downloads directory
+    downloads_path = str(Path.home() / "Downloads")
+
     # Save data to Excel
-    plant_folder = os.path.join("Downloads", plant_name.replace(" ", "_"))
+    plant_folder = os.path.join(downloads_path, plant_name.replace(" ", "_"))
     os.makedirs(plant_folder, exist_ok=True)
     st.write(f"Saving data to folder: {plant_folder}")
 
@@ -74,7 +78,7 @@ if phyto_data is not None and not phyto_data.empty:
 
     # Function to download 3D SDF files
     def download_3d_sdf_files(database, phyto_data):
-        download_folder = f"Downloads/{plant_name.replace(' ', '_')}_SDFs"
+        download_folder = os.path.join(sdf_folder)
         os.makedirs(download_folder, exist_ok=True)
 
         for index, row in phyto_data.iterrows():
