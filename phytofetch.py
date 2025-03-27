@@ -57,22 +57,18 @@ if phyto_data is not None and not phyto_data.empty:
     st.write(phyto_data)
 
     # Save data to Excel
-    # ✅ Create a single folder for the plant
     plant_folder = os.path.join("Downloads", plant_name.replace(" ", "_"))
     os.makedirs(plant_folder, exist_ok=True)
+    st.write(f"Saving data to folder: {plant_folder}")
 
-    # ✅ Save Excel file inside the plant folder
     excel_path = os.path.join(plant_folder, f"{plant_name.replace(' ', '_')}.xlsx")
     phyto_data.to_excel(excel_path, index=False)
     st.success(f"Saved phytochemical data as {excel_path}")
 
-    # ✅ Create a subfolder for SDF files inside the plant folder
     sdf_folder = os.path.join(plant_folder, "SDF_Files")
     os.makedirs(sdf_folder, exist_ok=True)
+    st.write(f"Created SDF folder: {sdf_folder}")
 
-    st.success(f"Saved phytochemical data as {plant_folder}")
-
-    # Choose database for 3D SDF download
     st.subheader("Choose database for 3D SDF:")
     database_option = st.radio("Choose database:", ("PubChem", "IMPPAT"))
 
