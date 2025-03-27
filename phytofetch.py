@@ -78,9 +78,6 @@ if phyto_data is not None and not phyto_data.empty:
 
     # Function to download 3D SDF files
     def download_3d_sdf_files(database, phyto_data):
-        download_folder = os.path.join(sdf_folder)
-        os.makedirs(download_folder, exist_ok=True)
-
         for index, row in phyto_data.iterrows():
             compound_name = row["Phytochemical name"]
             if database == "PubChem":
@@ -89,7 +86,7 @@ if phyto_data is not None and not phyto_data.empty:
                     if compound:
                         cid = compound[0].cid
                         sdf_url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/{cid}/SDF"
-                        sdf_path = os.path.join(download_folder, f"{compound_name}.sdf")
+                        sdf_path = os.path.join(sdf_folder, f"{compound_name}.sdf")
 
                         sdf_response = requests.get(sdf_url)
                         if sdf_response.status_code == 200:
@@ -106,7 +103,7 @@ if phyto_data is not None and not phyto_data.empty:
             elif database == "IMPPAT":
                 imp_id = row["IMPPAT Phytochemical identifier"]
                 sdf_url = f"https://cb.imsc.res.in/imppat/images/3D/SDF/{imp_id}_3D.sdf"
-                sdf_path = os.path.join(download_folder, f"{imp_id}.sdf")
+                sdf_path = os.path.join(sdf_folder, f"{imp_id}.sdf")
 
                 sdf_response = requests.get(sdf_url)
                 if sdf_response.status_code == 200:
