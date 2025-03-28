@@ -14,14 +14,14 @@ if "plant_folder" not in st.session_state:
     st.session_state.plant_folder = None
 
 # Function to create a folder for the plant
-def create_plant_folder(plant_name, save_directory):
+def create_plant_folder(plant_name, save_directory):  # Line 11 updated
     plant_folder = os.path.join(save_directory, plant_name.replace(" ", "_"))
     os.makedirs(plant_folder, exist_ok=True)
     return plant_folder
 
 # Function to download phytochemical data from IMPPAT
-def download_excel_from_imppat(plant_name, save_directory):
-    plant_folder = create_plant_folder(plant_name, save_directory)
+def download_excel_from_imppat(plant_name, save_directory):  # Line 18 updated
+    plant_folder = create_plant_folder(plant_name, save_directory)  # Line 19 updated
     plant_name_url = plant_name.replace(" ", "%20")
     url = f"https://cb.imsc.res.in/imppat/phytochemical/{plant_name_url}"
     
@@ -80,12 +80,12 @@ st.title("🌿 Phytochemical Data & 3D SDF Downloader")
 st.subheader("Enter a plant name to fetch phytochemical data")
 
 # Input for save directory
-save_directory = st.text_input("Enter the directory to save the files:", ".")
+save_directory = st.text_input("Enter the directory to save the files:", ".")  # Line 63 added
 
 plant_name = st.text_input("Enter the plant name:")
 if st.button("Fetch Phytochemicals"):
     if plant_name:
-        df, plant_folder = download_excel_from_imppat(plant_name, save_directory)
+        df, plant_folder = download_excel_from_imppat(plant_name, save_directory)  # Line 68 updated
         if df is not None:
             st.session_state.df = df  # Store dataframe in session state
             st.session_state.plant_folder = plant_folder  # Store folder path
