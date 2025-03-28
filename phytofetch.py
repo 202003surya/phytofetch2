@@ -5,6 +5,7 @@ import os
 import datetime
 import io
 import re
+import base64
 from bs4 import BeautifulSoup
 
 # Initialize session state variables
@@ -68,8 +69,12 @@ def download_sdf_from_pubchem(compound_name, plant_folder):
         file_path = os.path.join(plant_folder, f"{safe_compound_name}.sdf")
 
         try:
-            with open(file_path, "wb") as file:
-                file.write(response.content)
+            def create_download_link(file_path):
+                with open(file_path, "rb") as file:
+                     file_bytes = file.read()
+                b64 = base64.b64encode(file_bytes).decode()
+                href = f'<a href="data:file/sdf;base64,{b64}" download="{os.path.basename(file_path)}">📥 Download {os.path.basename(file_path)}</a>'
+                return href
             st.write(f"SDF file saved at: {file_path}")
             return f"✅ Downloaded {compound_name} from PubChem."
         except Exception as e:
