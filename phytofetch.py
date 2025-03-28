@@ -14,14 +14,15 @@ if "plant_folder" not in st.session_state:
     st.session_state.plant_folder = None
 
 # Function to create a folder for the plant
-def create_plant_folder(plant_name, save_directory):  # Line 11 updated
+def create_plant_folder(plant_name, save_directory):
     plant_folder = os.path.join(save_directory, plant_name.replace(" ", "_"))
     os.makedirs(plant_folder, exist_ok=True)
+    st.write(f"Plant folder created at: {plant_folder}")
     return plant_folder
 
 # Function to download phytochemical data from IMPPAT
-def download_excel_from_imppat(plant_name, save_directory):  # Line 18 updated
-    plant_folder = create_plant_folder(plant_name, save_directory)  # Line 19 updated
+def download_excel_from_imppat(plant_name, save_directory):
+    plant_folder = create_plant_folder(plant_name, save_directory)
     plant_name_url = plant_name.replace(" ", "%20")
     url = f"https://cb.imsc.res.in/imppat/phytochemical/{plant_name_url}"
     
@@ -39,8 +40,11 @@ def download_excel_from_imppat(plant_name, save_directory):  # Line 18 updated
             timestamp = datetime.datetime.now().strftime("%d_%m_%Y_%H-%M-%S")
             file_name = f"{plant_folder}/{plant_name.replace(' ', '_')}_phytochemicals_{timestamp}.xlsx"
             df.to_excel(file_name, index=False)
+            st.write(f"Excel file saved at: {file_name}")
             
             return df, plant_folder
+    else:
+        st.write(f"Failed to fetch data from IMPPAT. Status code: {response.status_code}")
     return None, None
 
 # Function to download SDF files from PubChem
@@ -54,8 +58,10 @@ def download_sdf_from_pubchem(compound_name, plant_folder):
 
         with open(file_path, "wb") as file:
             file.write(response.content)
+        st.write(f"SDF file saved at: {file_path}")
         return f"✅ Downloaded {compound_name} from PubChem."
     else:
+        st.write(f"Failed to download {compound_name} from PubChem. Status code: {response.status_code}")
         return f"❌ Failed to download {compound_name} from PubChem."
 
 # Function to download SDF files from IMPPAT
@@ -63,6 +69,7 @@ def download_sdf_from_imppat(imppat_id, plant_folder):
     file_path = os.path.join(plant_folder, f"{imppat_id}.sdf")
 
     if os.path.exists(file_path):
+        st.write(f"File already exists: {file_path}")
         return f"⚠️ {imppat_id} already exists. Skipping download."
 
     url = f"https://cb.imsc.res.in/imppat/images/3D/SDF/{imppat_id}_3D.sdf"
@@ -71,8 +78,10 @@ def download_sdf_from_imppat(imppat_id, plant_folder):
     if response.status_code == 200:
         with open(file_path, "wb") as file:
             file.write(response.content)
+        st.write(f"SDF file saved at: {file_path}")
         return f"✅ Downloaded {imppat_id} from IMPPAT."
     else:
+        st.write(f"Failed to download {imppat_id} from IMPPAT. Status code: {response.status_code}")
         return f"❌ Failed to download {imppat_id} from IMPPAT."
 
 # Streamlit UI
@@ -80,12 +89,12 @@ st.title("🌿 Phytochemical Data & 3D SDF Downloader")
 st.subheader("Enter a plant name to fetch phytochemical data")
 
 # Input for save directory
-save_directory = st.text_input("Enter the directory to save the files:", ".")  # Line 63 added
+save_directory = st.text_input("Enter the directory to save the files:", ".")
 
 plant_name = st.text_input("Enter the plant name:")
 if st.button("Fetch Phytochemicals"):
     if plant_name:
-        df, plant_folder = download_excel_from_imppat(plant_name, save_directory)  # Line 68 updated
+        df, plant_folder = download_excel_from_imppat(plant_name, save_directory)
         if df is not None:
             st.session_state.df = df  # Store dataframe in session state
             st.session_state.plant_folder = plant_folder  # Store folder path
