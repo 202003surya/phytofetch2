@@ -29,7 +29,7 @@ def download_excel_from_imppat(plant_name, save_directory):
     plant_folder = create_plant_folder(plant_name, save_directory)
     if not plant_folder:
         return None, None
-        
+
     plant_name_url = plant_name.replace(" ", "%20")
     url = f"https://cb.imsc.res.in/imppat/phytochemical/{plant_name_url}"
     
@@ -109,6 +109,8 @@ st.subheader("Enter a plant name to fetch phytochemical data")
 
 # Input for save directory
 save_directory = st.text_input("Enter the directory to save the files:", ".")
+st.write(f"Current working directory: {os.getcwd()}")
+st.write(f"Save directory: {save_directory}")
 
 plant_name = st.text_input("Enter the plant name:")
 if st.button("Fetch Phytochemicals"):
