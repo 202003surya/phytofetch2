@@ -15,14 +15,21 @@ if "plant_folder" not in st.session_state:
 
 # Function to create a folder for the plant
 def create_plant_folder(plant_name, save_directory):
-    plant_folder = os.path.join(save_directory, plant_name.replace(" ", "_"))
-    os.makedirs(plant_folder, exist_ok=True)
-    st.write(f"Plant folder created at: {plant_folder}")
-    return plant_folder
+    try:
+        plant_folder = os.path.join(save_directory, plant_name.replace(" ", "_"))
+        os.makedirs(plant_folder, exist_ok=True)
+        st.write(f"Plant folder created at: {plant_folder}")
+        return plant_folder
+    except Exception as e:
+        st.write(f"Error creating plant folder: {e}")
+        return None
 
 # Function to download phytochemical data from IMPPAT
 def download_excel_from_imppat(plant_name, save_directory):
     plant_folder = create_plant_folder(plant_name, save_directory)
+    if not plant_folder:
+        return None, None
+        
     plant_name_url = plant_name.replace(" ", "%20")
     url = f"https://cb.imsc.res.in/imppat/phytochemical/{plant_name_url}"
     
@@ -39,8 +46,12 @@ def download_excel_from_imppat(plant_name, save_directory):
 
             timestamp = datetime.datetime.now().strftime("%d_%m_%Y_%H-%M-%S")
             file_name = f"{plant_folder}/{plant_name.replace(' ', '_')}_phytochemicals_{timestamp}.xlsx"
-            df.to_excel(file_name, index=False)
-            st.write(f"Excel file saved at: {file_name}")
+            try:
+                df.to_excel(file_name, index=False)
+                st.write(f"Excel file saved at: {file_name}")
+            except Exception as e:
+                st.write(f"Error saving Excel file: {e}")
+                return None, None
             
             return df, plant_folder
     else:
@@ -56,10 +67,14 @@ def download_sdf_from_pubchem(compound_name, plant_folder):
         safe_compound_name = re.sub(r'[<>:"/\\|?*()\[\],\'\s]+', '_', compound_name)
         file_path = os.path.join(plant_folder, f"{safe_compound_name}.sdf")
 
-        with open(file_path, "wb") as file:
-            file.write(response.content)
-        st.write(f"SDF file saved at: {file_path}")
-        return f"✅ Downloaded {compound_name} from PubChem."
+        try:
+            with open(file_path, "wb") as file:
+                file.write(response.content)
+            st.write(f"SDF file saved at: {file_path}")
+            return f"✅ Downloaded {compound_name} from PubChem."
+        except Exception as e:
+            st.write(f"Error saving SDF file: {e}")
+            return f"❌ Failed to save {compound_name} from PubChem."
     else:
         st.write(f"Failed to download {compound_name} from PubChem. Status code: {response.status_code}")
         return f"❌ Failed to download {compound_name} from PubChem."
@@ -76,10 +91,14 @@ def download_sdf_from_imppat(imppat_id, plant_folder):
     response = requests.get(url)
     
     if response.status_code == 200:
-        with open(file_path, "wb") as file:
-            file.write(response.content)
-        st.write(f"SDF file saved at: {file_path}")
-        return f"✅ Downloaded {imppat_id} from IMPPAT."
+        try:
+            with open(file_path, "wb") as file:
+                file.write(response.content)
+            st.write(f"SDF file saved at: {file_path}")
+            return f"✅ Downloaded {imppat_id} from IMPPAT."
+        except Exception as e:
+            st.write(f"Error saving SDF file: {e}")
+            return f"❌ Failed to save {imppat_id} from IMPPAT."
     else:
         st.write(f"Failed to download {imppat_id} from IMPPAT. Status code: {response.status_code}")
         return f"❌ Failed to download {imppat_id} from IMPPAT."
