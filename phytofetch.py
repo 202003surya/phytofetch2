@@ -70,12 +70,8 @@ def download_sdf_from_pubchem(compound_name, plant_folder):
 
         try:
             def create_download_link(file_path):
-                with open(file_path, "rb") as file:
-                     file_bytes = file.read()
-                b64 = base64.b64encode(file_bytes).decode()
-                href = f'<a href="data:file/sdf;base64,{b64}" download="{os.path.basename(file_path)}">📥 Download {os.path.basename(file_path)}</a>'
-                return href
-            st.markdown(create_download_link("C:/Users/surya/OneDrive/Desktop/phyto data"), unsafe_allow_html=True)    
+                with open(file_path, "wb") as file:
+                     file.write(response.content)
             st.write(f"SDF file saved at: {file_path}")
             return f"✅ Downloaded {compound_name} from PubChem."
         except Exception as e:
@@ -99,13 +95,8 @@ def download_sdf_from_imppat(imppat_id, plant_folder):
     if response.status_code == 200:
         try:
             def create_download_link(file_path):
-              with open(file_path, "rb") as file:
-                  file_bytes = file.read()
-              b64 = base64.b64encode(file_bytes).decode()
-              href = f'<a href="data:file/sdf;base64,{b64}" download="{os.path.basename(file_path)}">📥 Download {os.path.basename(file_path)}</a>'
-              return href
-            st.markdown(create_download_link("Users\surya\OneDrive\Desktop\phyto data"), unsafe_allow_html=True)    
-            st.write(f"SDF file saved at: {file_path}")
+              with open(file_path, "wb") as file:
+                     file.write(response.content)
             return f"✅ Downloaded {imppat_id} from IMPPAT."
         except Exception as e:
             st.write(f"Error saving SDF file: {e}")
